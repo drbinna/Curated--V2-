@@ -82,13 +82,7 @@ jobs:
             echo "🔐 App key..."
             php artisan key:generate --force --no-interaction || true
 
-            echo "🛠️ Writing MySQL database configuration..."
-            sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env || echo "DB_CONNECTION=mysql" >> .env
-            sed -i "s/^DB_HOST=.*/DB_HOST=${{ secrets.MYSQL_HOST }}/" .env || echo "DB_HOST=${{ secrets.MYSQL_HOST }}" >> .env
-            sed -i "s/^DB_PORT=.*/DB_PORT=${{ secrets.MYSQL_PORT || '3306' }}/" .env || echo "DB_PORT=3306" >> .env
-            sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${{ secrets.MYSQL_DATABASE }}/" .env || echo "DB_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
-            sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${{ secrets.MYSQL_USERNAME }}/" .env || echo "DB_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
-            sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}/" .env || echo "DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+            
 
             echo "🔄 Running migrations..."
             php artisan migrate --force
