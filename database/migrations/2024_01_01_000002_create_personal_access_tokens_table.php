@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->uuidMorphs('tokenable');
+            // Manually define morphs to keep tokenable_type <= 191 for MySQL index limits
+            $table->string('tokenable_type', 191);
+            $table->uuid('tokenable_id');
             $table->string('name');
             $table->string('token', 64)->unique();
             $table->text('abilities')->nullable();
@@ -18,7 +20,7 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
 
-            $table->index(['tokenable_type', 'tokenable_id']);
+            $table->index(['tokenable_type', 'tokenable_id'], 'pat_tokenable_index');
         });
     }
 
