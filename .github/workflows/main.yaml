@@ -68,28 +68,27 @@ jobs:
           script: |
             set -e
 
-            echo "📍 Current location:"
-            pwd
-
             echo "📂 Changing to deployment directory..."
             cd ${{ secrets.CURATED_DEPLOY_PATH }}
-
-            echo "📍 Now at:"
-            pwd
-
-            echo "📄 Files in directory:"
-            ls -la
-
-            echo "🔍 Looking for artisan:"
-            ls -l artisan || echo "❌ artisan file not found!"
-
-            echo "🔍 Checking for views directory:"
-            ls -la resources/views || echo "❌ views directory not found!"
 
             echo "📁 Creating necessary directories..."
             mkdir -p storage/framework/{sessions,views,cache}
             mkdir -p storage/logs
             mkdir -p bootstrap/cache
+
+            echo "🧩 Ensuring .env exists..."
+            if [ ! -f .env ]; then cp .env.example .env || touch .env; fi
+
+            echo "🔐 App key..."
+            php artisan key:generate --force --no-interaction || true
+
+            echo "🛠️ Writing MySQL database configuration..."
+            sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env || echo "DB_CONNECTION=mysql" >> .env
+            sed -i "s/^DB_HOST=.*/DB_HOST=${{ secrets.MYSQL_HOST }}/" .env || echo "DB_HOST=${{ secrets.MYSQL_HOST }}" >> .env
+            sed -i "s/^DB_PORT=.*/DB_PORT=${{ secrets.MYSQL_PORT || '3306' }}/" .env || echo "DB_PORT=3306" >> .env
+            sed -i "s/^DB_DATABASE=.*/DB_DATABASE=${{ secrets.MYSQL_DATABASE }}/" .env || echo "DB_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+            sed -i "s/^DB_USERNAME=.*/DB_USERNAME=${{ secrets.MYSQL_USERNAME }}/" .env || echo "DB_USERNAME=${{ secrets.MYSQL_USERNAME }}" >> .env
+            sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}/" .env || echo "DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
 
             echo "🔄 Running migrations..."
             php artisan migrate --force
@@ -99,9 +98,6 @@ jobs:
 
             echo "⚡ Optimizing Laravel..."
             php artisan config:cache
-
-            # Only cache routes if you have route closures converted to controller methods
-            # If you have closures in routes/web.php or routes/api.php, skip this
             if php artisan route:cache 2>/dev/null; then
               echo "✅ Routes cached successfully"
             else
@@ -110,9 +106,3 @@ jobs:
 
             echo "🔒 Setting permissions..."
             chmod -R 775 storage bootstrap/cache
-
-            # If you're on shared hosting, you might need:
-            # find storage bootstrap/cache -type f -exec chmod 664 {} \;
-            # find storage bootstrap/cache -type d -exec chmod 775 {} \;
-
-            echo "✅ Deployment complete!"
