@@ -21,6 +21,9 @@ jobs:
           extensions: mbstring, bcmath, curl, xml, ctype, json, tokenizer
           tools: composer
 
+      - name: Pin Composer platform to PHP 8.2
+        run: composer config platform.php 8.2.29
+
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
