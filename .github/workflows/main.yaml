@@ -1,0 +1,115 @@
+name: 🚀 Deploy Laravel Project to Namecheap via SSH
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Namecheap
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, bcmath, curl, xml, ctype, json, tokenizer
+          tools: composer
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      # Uncomment if using Vite or npm build
+      # - name: Build frontend assets
+      #   run: |
+      #     npm ci
+      #     npm run build
+
+      - name: Deploy files via rsync over SSH
+        run: |
+          echo "${{ secrets.CURATED_SSH_KEY }}" > deploy_key
+          chmod 600 deploy_key
+          rsync -avz --delete \
+            -e "ssh -i deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.CURATED_SSH_PORT }}" \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='tests' \
+            --exclude='.github' \
+            --exclude='storage/framework/cache/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*' \
+            --exclude='storage/logs/*' \
+            --include='storage/' \
+            --include='storage/app/' \
+            --include='storage/app/public/' \
+            --include='storage/framework/' \
+            --include='storage/framework/.gitignore' \
+            --include='storage/logs/' \
+            --include='storage/logs/.gitignore' \
+            ./ ${{ secrets.CURATED_SSH_USER }}@${{ secrets.NAMECHEAP_SSH_HOST }}:${{ secrets.CURATED_DEPLOY_PATH }}/
+          rm -f deploy_key
+
+      - name: Run deployment commands
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.NAMECHEAP_SSH_HOST }}
+          username: ${{ secrets.CURATED_SSH_USER }}
+          key: ${{ secrets.CURATED_SSH_KEY }}
+          port: ${{ secrets.CURATED_SSH_PORT }}
+          script: |
+            set -e
+
+            echo "📍 Current location:"
+            pwd
+
+            echo "📂 Changing to deployment directory..."
+            cd ${{ secrets.CURATED_DEPLOY_PATH }}
+
+            echo "📍 Now at:"
+            pwd
+
+            echo "📄 Files in directory:"
+            ls -la
+
+            echo "🔍 Looking for artisan:"
+            ls -l artisan || echo "❌ artisan file not found!"
+
+            echo "🔍 Checking for views directory:"
+            ls -la resources/views || echo "❌ views directory not found!"
+
+            echo "📁 Creating necessary directories..."
+            mkdir -p storage/framework/{sessions,views,cache}
+            mkdir -p storage/logs
+            mkdir -p bootstrap/cache
+
+            echo "🔄 Running migrations..."
+            php artisan migrate --force
+
+            echo "🗑️ Clearing old cache..."
+            php artisan optimize:clear
+
+            echo "⚡ Optimizing Laravel..."
+            php artisan config:cache
+
+            # Only cache routes if you have route closures converted to controller methods
+            # If you have closures in routes/web.php or routes/api.php, skip this
+            if php artisan route:cache 2>/dev/null; then
+              echo "✅ Routes cached successfully"
+            else
+              echo "⚠️ Route caching skipped (you may have route closures)"
+            fi
+
+            echo "🔒 Setting permissions..."
+            chmod -R 775 storage bootstrap/cache
+
+            # If you're on shared hosting, you might need:
+            # find storage bootstrap/cache -type f -exec chmod 664 {} \;
+            # find storage bootstrap/cache -type d -exec chmod 775 {} \;
+
+            echo "✅ Deployment complete!"

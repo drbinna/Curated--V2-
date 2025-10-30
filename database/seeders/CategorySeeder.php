@@ -26,3 +26,4 @@ class CategorySeeder extends Seeder
     }
 }
 
+

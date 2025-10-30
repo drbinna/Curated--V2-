@@ -200,3 +200,4 @@ substack-hub-api/
 
 Full API documentation is available in `API-README.md` with detailed endpoint specifications, request/response examples, error handling, rate limiting, and WebSocket events.
 
+
