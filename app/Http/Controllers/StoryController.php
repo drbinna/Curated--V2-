@@ -68,6 +68,8 @@ class StoryController extends Controller
             $story->categories()->attach($request->category_ids);
         }
 
+        $story->load('publication', 'categories');
+
         return response()->json([
             'success' => true,
             'data' => $story,
@@ -168,7 +170,7 @@ class StoryController extends Controller
 
         $stories = $user->stories()
             ->with('publication', 'categories')
-            ->orderBy('published_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(20);
 
         return response()->json([
