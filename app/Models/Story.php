@@ -29,7 +29,6 @@ class Story extends Model
 
     protected $fillable = [
         'user_id',
-        'publication_id',
         'title',
         'excerpt',
         'image_url',
@@ -62,11 +61,6 @@ class Story extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function publication(): BelongsTo
-    {
-        return $this->belongsTo(Publication::class);
     }
 
     public function categories(): BelongsToMany

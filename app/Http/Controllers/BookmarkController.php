@@ -11,7 +11,7 @@ class BookmarkController extends Controller
     public function index(Request $request)
     {
         $bookmarks = auth()->user()->bookmarks()
-            ->with('story.user', 'story.publication', 'story.categories')
+            ->with('story.user', 'story.categories')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

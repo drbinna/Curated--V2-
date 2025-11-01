@@ -10,7 +10,7 @@ class StoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Story::with('user', 'publication', 'categories');
+        $query = Story::with('user', 'categories');
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -30,7 +30,7 @@ class StoryController extends Controller
 
     public function show(Story $story)
     {
-        $story->load('user', 'publication', 'categories');
+        $story->load('user', 'categories');
         $story->view_count++;
         $story->save();
 
@@ -43,7 +43,6 @@ class StoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'publication_id' => 'required|exists:publications,id',
             'title' => 'required|string|max:500',
             'excerpt' => 'required|string',
             'image_url' => 'nullable|url',
@@ -55,7 +54,6 @@ class StoryController extends Controller
 
         $story = Story::create([
             'user_id' => auth()->id(),
-            'publication_id' => $request->publication_id,
             'title' => $request->title,
             'excerpt' => $request->excerpt,
             'image_url' => $request->image_url,
@@ -68,7 +66,7 @@ class StoryController extends Controller
             $story->categories()->attach($request->category_ids);
         }
 
-        $story->load('publication', 'categories');
+        $story->load('categories');
 
         return response()->json([
             'success' => true,
@@ -135,7 +133,7 @@ class StoryController extends Controller
 
     public function trending(Request $request)
     {
-        $stories = Story::with('user', 'publication')
+        $stories = Story::with('user')
             ->where('status', 'active')
             ->where('expires_at', '>', now())
             ->orderByDesc('view_count')
@@ -151,7 +149,7 @@ class StoryController extends Controller
 
     public function bar(Request $request)
     {
-        $stories = Story::with('user', 'publication')
+        $stories = Story::with('user')
             ->where('status', 'active')
             ->where('expires_at', '>', now())
             ->orderBy('published_at', 'desc')
@@ -169,7 +167,7 @@ class StoryController extends Controller
         $user = $request->user();
 
         $stories = $user->stories()
-            ->with('publication', 'categories')
+            ->with('categories')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

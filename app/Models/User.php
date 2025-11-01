@@ -70,11 +70,6 @@ class User extends Authenticatable
         return $this->hasMany(Bookmark::class);
     }
 
-    public function publications(): HasMany
-    {
-        return $this->hasMany(Publication::class);
-    }
-
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);

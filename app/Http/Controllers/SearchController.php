@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Story;
 use App\Models\User;
-use App\Models\Publication;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -17,16 +16,11 @@ class SearchController extends Controller
 
         $stories = Story::where('title', 'like', '%' . $request->q . '%')
             ->orWhere('excerpt', 'like', '%' . $request->q . '%')
-            ->with('user', 'publication', 'categories')
+            ->with('user', 'categories')
             ->paginate(20);
 
         $users = User::where('name', 'like', '%' . $request->q . '%')
             ->orWhere('username', 'like', '%' . $request->q . '%')
-            ->paginate(20);
-
-        $publications = Publication::where('name', 'like', '%' . $request->q . '%')
-            ->orWhere('description', 'like', '%' . $request->q . '%')
-            ->with('user')
             ->paginate(20);
 
         return response()->json([
@@ -34,7 +28,6 @@ class SearchController extends Controller
             'data' => [
                 'stories' => $stories,
                 'users' => $users,
-                'publications' => $publications,
             ],
         ]);
     }
@@ -45,7 +38,7 @@ class SearchController extends Controller
 
         $stories = Story::where('title', 'like', '%' . $request->q . '%')
             ->orWhere('excerpt', 'like', '%' . $request->q . '%')
-            ->with('user', 'publication', 'categories')
+            ->with('user', 'categories')
             ->paginate(20);
 
         return response()->json([
@@ -65,21 +58,6 @@ class SearchController extends Controller
         return response()->json([
             'success' => true,
             'data' => $users,
-        ]);
-    }
-
-    public function publications(Request $request)
-    {
-        $request->validate(['q' => 'required|string']);
-
-        $publications = Publication::where('name', 'like', '%' . $request->q . '%')
-            ->orWhere('description', 'like', '%' . $request->q . '%')
-            ->with('user')
-            ->paginate(20);
-
-        return response()->json([
-            'success' => true,
-            'data' => $publications,
         ]);
     }
 }

@@ -10,7 +10,7 @@ class FeedController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = Story::with('user', 'publication', 'categories')
+        $query = Story::with('user', 'categories')
             ->where('status', 'active')
             ->where('expires_at', '>', now());
 

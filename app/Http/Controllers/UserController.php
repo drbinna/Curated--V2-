@@ -9,7 +9,7 @@ class UserController extends Controller
 {
     public function show(User $user)
     {
-        $user->load('stories', 'publications');
+        $user->load('stories');
         $user->followers_count = $user->followers()->count();
         $user->following_count = $user->follows()->count();
         $user->stories_count = $user->stories()->count();
@@ -77,7 +77,7 @@ class UserController extends Controller
 
     public function stories(User $user)
     {
-        $stories = $user->stories()->with('publication', 'categories')->paginate(20);
+        $stories = $user->stories()->with('categories')->paginate(20);
 
         return response()->json([
             'success' => true,

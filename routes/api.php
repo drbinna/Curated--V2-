@@ -6,7 +6,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\NotificationController;
@@ -75,16 +74,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/categories/{category}/follow', [CategoryController::class, 'follow']);
     Route::delete('/categories/{category}/follow', [CategoryController::class, 'unfollow']);
 
-    // Publications
-    Route::get('/publications', [PublicationController::class, 'index']);
-    Route::get('/publications/{publication}', [PublicationController::class, 'show']);
-    Route::post('/publications/{publication}/sync', [PublicationController::class, 'sync']);
-
     // Search
     Route::get('/search', [SearchController::class, 'index']);
     Route::get('/search/stories', [SearchController::class, 'stories']);
     Route::get('/search/users', [SearchController::class, 'users']);
-    Route::get('/search/publications', [SearchController::class, 'publications']);
 
     // Analytics
     Route::get('/analytics/stories/{story}', [AnalyticsController::class, 'story']);
