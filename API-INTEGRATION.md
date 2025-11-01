@@ -207,6 +207,41 @@ Authentication: Bearer tokens via Laravel Sanctum
 - POST /api/stories/{storyId}/view
 - POST /api/stories/{storyId}/click
 
+- GET /api/me/stories
+  - Description: Get the authenticated user's stories
+  - Headers: `Authorization: Bearer {token}`
+  - Query: `page`, `per_page`
+  - Response 200 (paginated):
+```json
+{
+  "success": true,
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": "uuid",
+        "title": "...",
+        "excerpt": "...",
+        "image_url": null,
+        "substack_post_url": "https://...",
+        "published_at": "2025-10-25T10:00:00Z",
+        "expires_at": "2025-10-27T10:00:00Z",
+        "status": "active",
+        "view_count": 12,
+        "click_count": 3,
+        "save_count": 1,
+        "share_count": 0,
+        "publication": { "id": "uuid", "name": "..." },
+        "categories": [ {"id":"uuid","name":"Technology"} ]
+      }
+    ],
+    "last_page": 1,
+    "per_page": 20,
+    "total": 1
+  }
+}
+```
+
 ---
 
 ### Feed

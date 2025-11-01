@@ -49,6 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/stories/{story}/view', [StoryController::class, 'recordView']);
     Route::post('/stories/{story}/click', [StoryController::class, 'recordClick']);
 
+    // Me shortcuts
+    Route::get('/me/stories', [StoryController::class, 'myStories']);
+
     // Feed
     Route::get('/feed', [FeedController::class, 'index']);
 

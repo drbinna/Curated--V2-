@@ -161,6 +161,21 @@ class StoryController extends Controller
             'data' => $stories,
         ]);
     }
+
+    public function myStories(Request $request)
+    {
+        $user = $request->user();
+
+        $stories = $user->stories()
+            ->with('publication', 'categories')
+            ->orderBy('published_at', 'desc')
+            ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => $stories,
+        ]);
+    }
 }
 
 
