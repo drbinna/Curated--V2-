@@ -85,7 +85,7 @@ jobs:
             
 
             echo "🔄 Running migrations..."
-            php artisan migrate --force
+            php artisan migrate 
 
             echo "🗑️ Clearing old cache..."
             php artisan optimize:clear
