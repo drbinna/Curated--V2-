@@ -42,9 +42,9 @@ class UploadController extends Controller
         // Store on local public disk
         $path = $file->storeAs($folder, $filename, 'public');
 
-        // Generate full URL with APP_URL
+        // Generate full URL with APP_URL including /public prefix
         $appUrl = rtrim(config('app.url'), '/');
-        $storagePath = '/storage/' . $path;
+        $storagePath = '/public/storage/' . $path;
         $fullUrl = $appUrl . $storagePath;
 
         return response()->json([
