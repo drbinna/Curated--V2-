@@ -30,17 +30,31 @@ class UploadController extends Controller
             ], 422);
         }
 
-        // Build safe filename
-        $folder = "uploads/{$request->type}s"; // uploads/stories, uploads/avatars, uploads/publications
+        // Build safe filename with correct plural form
+        $folderMap = [
+            'story' => 'uploads/stories',
+            'avatar' => 'uploads/avatars',
+            'publication' => 'uploads/publications',
+        ];
+        $folder = $folderMap[$request->type] ?? "uploads/{$request->type}s";
         $filename = Str::uuid()->toString().".".$ext;
 
         // Store on local public disk
         $path = $file->storeAs($folder, $filename, 'public');
 
+        // Generate URL - ensure it starts with /storage
+        $url = Storage::disk('public')->url($path);
+        
+        // Ensure URL uses correct format (relative path)
+        if (str_starts_with($url, 'http')) {
+            // If full URL, extract just the path part
+            $url = parse_url($url, PHP_URL_PATH) ?? '/storage/' . $path;
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
-                'url' => Storage::disk('public')->url($path),
+                'url' => $url,
                 'path' => $path,
             ],
         ]);

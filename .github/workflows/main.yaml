@@ -82,8 +82,11 @@ jobs:
             echo "🔐 App key..."
             php artisan key:generate --force --no-interaction || true
 
-            
+            echo "🔗 Creating storage symlink..."
+            php artisan storage:link || true
 
+            echo "🔄 Running seeders..."
+            php artisan db:seed --class=CategorySeeder
             echo "🔄 Running migrations..."
             php artisan migrate 
 
