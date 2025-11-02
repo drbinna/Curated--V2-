@@ -42,19 +42,15 @@ class UploadController extends Controller
         // Store on local public disk
         $path = $file->storeAs($folder, $filename, 'public');
 
-        // Generate URL - ensure it starts with /storage
-        $url = Storage::disk('public')->url($path);
-        
-        // Ensure URL uses correct format (relative path)
-        if (str_starts_with($url, 'http')) {
-            // If full URL, extract just the path part
-            $url = parse_url($url, PHP_URL_PATH) ?? '/storage/' . $path;
-        }
+        // Generate full URL with APP_URL
+        $appUrl = rtrim(config('app.url'), '/');
+        $storagePath = '/storage/' . $path;
+        $fullUrl = $appUrl . $storagePath;
 
         return response()->json([
             'success' => true,
             'data' => [
-                'url' => $url,
+                'url' => $fullUrl,
                 'path' => $path,
             ],
         ]);
