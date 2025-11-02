@@ -83,13 +83,22 @@ class StoryController extends Controller
             'title' => 'sometimes|string|max:500',
             'excerpt' => 'sometimes|string',
             'image_url' => 'nullable|url',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'exists:categories,id',
         ]);
 
         $story->update($request->only(['title', 'excerpt', 'image_url']));
 
+        // Update categories if provided
+        if ($request->has('category_ids')) {
+            $story->categories()->sync($request->category_ids);
+        }
+
+        $story->load('categories');
+
         return response()->json([
             'success' => true,
-            'data' => $story->fresh(),
+            'data' => $story->fresh(['categories']),
         ]);
     }
 
@@ -133,7 +142,7 @@ class StoryController extends Controller
 
     public function trending(Request $request)
     {
-        $stories = Story::with('user')
+        $stories = Story::with('user', 'categories')
             ->where('status', 'active')
             ->where('expires_at', '>', now())
             ->orderByDesc('view_count')
@@ -149,7 +158,7 @@ class StoryController extends Controller
 
     public function bar(Request $request)
     {
-        $stories = Story::with('user')
+        $stories = Story::with('user', 'categories')
             ->where('status', 'active')
             ->where('expires_at', '>', now())
             ->orderBy('published_at', 'desc')
