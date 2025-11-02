@@ -48,9 +48,11 @@ jobs:
             --exclude='storage/framework/sessions/*' \
             --exclude='storage/framework/views/*' \
             --exclude='storage/logs/*' \
+            --exclude='storage/app/public/uploads' \
             --include='storage/' \
             --include='storage/app/' \
             --include='storage/app/public/' \
+            --include='storage/app/public/.gitkeep' \
             --include='storage/framework/' \
             --include='storage/framework/.gitignore' \
             --include='storage/logs/' \
@@ -75,6 +77,7 @@ jobs:
             mkdir -p storage/framework/{sessions,views,cache}
             mkdir -p storage/logs
             mkdir -p bootstrap/cache
+            mkdir -p storage/app/public/uploads/{stories,avatars,publications}
 
             echo "🧩 Ensuring .env exists..."
             if [ ! -f .env ]; then cp .env.example .env || touch .env; fi

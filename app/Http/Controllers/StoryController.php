@@ -45,7 +45,7 @@ class StoryController extends Controller
         $request->validate([
             'title' => 'required|string|max:500',
             'excerpt' => 'required|string',
-            'image_url' => 'nullable|url',
+            'image_url' => 'nullable|string|max:500',
             'substack_post_url' => 'required|url',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
@@ -82,7 +82,7 @@ class StoryController extends Controller
         $request->validate([
             'title' => 'sometimes|string|max:500',
             'excerpt' => 'sometimes|string',
-            'image_url' => 'nullable|url',
+            'image_url' => 'nullable|string|max:500',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id',
         ]);
