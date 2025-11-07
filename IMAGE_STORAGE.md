@@ -61,3 +61,4 @@ If images are deleted:
 3. Ensure `php artisan storage:link` has been run
 4. Check file permissions: `chmod -R 775 storage/app/public/uploads`
 
+

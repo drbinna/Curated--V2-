@@ -20,6 +20,11 @@ class StoryController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
+        // Exclude logged-in user's posts if exclude_me is true
+        if ($request->boolean('exclude_me')) {
+            $query->where('user_id', '!=', auth()->id());
+        }
+
         $stories = $query->orderBy('published_at', 'desc')->paginate(20);
 
         return response()->json([
@@ -179,6 +184,28 @@ class StoryController extends Controller
             ->with('categories')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => $stories,
+        ]);
+    }
+
+    public function othersStories(Request $request)
+    {
+        $query = Story::with('user', 'categories')
+            ->where('user_id', '!=', auth()->id())
+            ->where('status', 'active')
+            ->where('expires_at', '>', now());
+
+        // Filter by category if provided
+        if ($request->has('category')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
+        }
+
+        $stories = $query->orderBy('published_at', 'desc')->paginate(20);
 
         return response()->json([
             'success' => true,

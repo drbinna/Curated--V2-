@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Me shortcuts
     Route::get('/me/stories', [StoryController::class, 'myStories']);
+    Route::get('/stories/others', [StoryController::class, 'othersStories']);
 
     // Feed
     Route::get('/feed', [FeedController::class, 'index']);

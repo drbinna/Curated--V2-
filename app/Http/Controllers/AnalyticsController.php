@@ -70,3 +70,4 @@ class AnalyticsController extends Controller
 
 
 
+
