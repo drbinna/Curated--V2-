@@ -64,7 +64,7 @@ class StoryController extends Controller
             'image_url' => $request->image_url,
             'substack_post_url' => $request->substack_post_url,
             'published_at' => $request->publish_now ? now() : null,
-            'expires_at' => $request->publish_now ? now()->addHours(48) : now()->addHours(48),
+            'expires_at' => $request->publish_now ? now()->addHours(168) : now()->addHours(168),
         ]);
 
         if ($request->has('category_ids')) {
@@ -193,13 +193,24 @@ class StoryController extends Controller
 
     public function othersStories(Request $request)
     {
-        $query = Story::with('user', 'categories')
-            ->where('user_id', '!=', auth()->id())
-            ->where('status', 'active')
-            ->where('expires_at', '>', now());
+        $userId = auth()->id(); // Get logged-in user's ID (null if unauthenticated)
 
-        // Filter by category if provided
-        if ($request->has('category')) {
+        $query = Story::with(['user', 'categories'])
+            ->where('status', 'active')
+            ->where(function ($q) use ($userId) {
+                // Only exclude the user's own stories if logged in
+                if ($userId) {
+                    $q->where('user_id', '!=', $userId);
+                }
+            })
+            ->where(function ($q) {
+                // Handle expiration: allow if no expiry set, or still valid
+                $q->whereNull('expires_at')
+                ->orWhere('expires_at', '>', now());
+            });
+
+        // Optional: filter by category slug
+        if ($request->filled('category')) {
             $query->whereHas('categories', function ($q) use ($request) {
                 $q->where('slug', $request->category);
             });
@@ -212,7 +223,5 @@ class StoryController extends Controller
             'data' => $stories,
         ]);
     }
+
 }
-
-
-

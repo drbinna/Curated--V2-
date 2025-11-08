@@ -23,7 +23,7 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     // Auth routes
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/tokens', [AuthController::class, 'tokens']);
     Route::delete('/auth/tokens/{tokenId}', [AuthController::class, 'destroyToken']);
     Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
-    
+
     // Substack OAuth
     Route::get('/auth/substack', [AuthController::class, 'connectSubstack']);
     Route::get('/auth/substack/callback', [AuthController::class, 'substackCallback']);
@@ -42,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stories/bar', [StoryController::class, 'bar']);
     Route::get('/stories/trending', [StoryController::class, 'trending']);
     Route::post('/stories', [StoryController::class, 'store']);
+    Route::get('/stories/others', [StoryController::class, 'othersStories']);
     Route::get('/stories/{story}', [StoryController::class, 'show']);
     Route::put('/stories/{story}', [StoryController::class, 'update']);
     Route::delete('/stories/{story}', [StoryController::class, 'destroy']);
@@ -50,7 +51,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Me shortcuts
     Route::get('/me/stories', [StoryController::class, 'myStories']);
-    Route::get('/stories/others', [StoryController::class, 'othersStories']);
 
     // Feed
     Route::get('/feed', [FeedController::class, 'index']);
@@ -96,6 +96,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/upload/image', [UploadController::class, 'deleteImage']);
 
 });
-
-
-
