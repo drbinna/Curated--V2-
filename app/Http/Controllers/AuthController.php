@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -124,14 +126,57 @@ class AuthController extends Controller
             'name' => 'sometimes|string|max:255',
             'username' => 'sometimes|string|max:100|unique:users,username,' . $request->user()->id,
             'bio' => 'nullable|string|max:1000',
-            'avatar_url' => 'nullable|url',
+            'avatar' => 'nullable|file|image|mimes:jpeg,jpg,png,gif,webp|mimetypes:image/jpeg,image/png,image/gif,image/webp|max:5120',
+            'avatar_url' => 'nullable|string|max:500',
         ]);
 
-        $request->user()->update($request->only(['name', 'username', 'bio', 'avatar_url']));
+        $user = $request->user();
+        $updateData = $request->only(['name', 'username', 'bio']);
+
+        // Handle avatar image upload
+        if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            
+            // Extension whitelist (defense in depth)
+            $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
+            $ext = strtolower($file->getClientOriginalExtension());
+            if (!in_array($ext, $allowedExtensions, true)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => [
+                        'message' => 'Unsupported file extension. Allowed: jpeg, jpg, png, gif, webp',
+                        'code' => 'VALIDATION_ERROR',
+                    ],
+                ], 422);
+            }
+
+            // Delete old avatar if exists
+            if ($user->avatar_url) {
+                $oldPath = str_replace(config('app.url') . '/public/storage/', '', $user->avatar_url);
+                if (Str::startsWith($oldPath, 'uploads/avatars/')) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            // Store new avatar
+            $folder = 'uploads/avatars';
+            $filename = Str::uuid()->toString() . '.' . $ext;
+            $path = $file->storeAs($folder, $filename, 'public');
+
+            // Generate full URL with APP_URL including /public prefix
+            $appUrl = rtrim(config('app.url'), '/');
+            $storagePath = '/public/storage/' . $path;
+            $updateData['avatar_url'] = $appUrl . $storagePath;
+        } elseif ($request->has('avatar_url')) {
+            // Allow direct URL update (for backward compatibility or external URLs)
+            $updateData['avatar_url'] = $request->avatar_url;
+        }
+
+        $user->update($updateData);
 
         return response()->json([
             'success' => true,
-            'data' => $request->user()->fresh(),
+            'data' => $user->fresh(),
         ]);
     }
 
@@ -178,6 +223,9 @@ class AuthController extends Controller
         ]);
     }
 }
+
+
+
 
 
 
