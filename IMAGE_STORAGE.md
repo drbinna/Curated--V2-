@@ -62,3 +62,7 @@ If images are deleted:
 4. Check file permissions: `chmod -R 775 storage/app/public/uploads`
 
 
+
+
+
+
