@@ -177,6 +177,27 @@ class AuthController extends Controller
             'message' => 'Substack disconnected',
         ]);
     }
+
+    public function saveCategoryInterests(Request $request)
+    {
+        $request->validate([
+            'category_ids' => 'required|array',
+            'category_ids.*' => 'required|string|exists:categories,id',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'category_interests' => $request->category_ids,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category interests saved successfully',
+            'data' => [
+                'user' => $user->fresh(),
+            ],
+        ]);
+    }
 }
 
 

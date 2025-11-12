@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/tokens', [AuthController::class, 'tokens']);
     Route::delete('/auth/tokens/{tokenId}', [AuthController::class, 'destroyToken']);
     Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/auth/category-interests', [AuthController::class, 'saveCategoryInterests']);
 
     // Substack OAuth
     Route::get('/auth/substack', [AuthController::class, 'connectSubstack']);

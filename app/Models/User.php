@@ -35,6 +35,7 @@ class User extends Authenticatable
         'bio',
         'avatar_url',
         'user_type',
+        'category_interests',
         'substack_id',
         'substack_access_token',
     ];
@@ -48,6 +49,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'category_interests' => 'array',
     ];
 
     public function stories(): HasMany
