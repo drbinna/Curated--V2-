@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'ensure.category.interests' => \App\Http\Middleware\EnsureCategoryInterests::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
