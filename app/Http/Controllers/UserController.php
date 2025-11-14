@@ -7,29 +7,53 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function show(User $user)
+    public function show(User $user, Request $request)
     {
-        $user->load('stories');
-        $user->followers_count = $user->followers()->count();
-        $user->following_count = $user->follows()->count();
-        $user->stories_count = $user->stories()->count();
-        $user->is_following = auth()->user() ? auth()->user()->isFollowing($user) : false;
+        // Get all user stories with categories
+        // By default, show all stories. Can filter by status if needed
+        $storiesQuery = $user->stories()->with('categories');
+        
+        // Optional filter by status (active, expired, archived)
+        if ($request->has('status')) {
+            $storiesQuery->where('status', $request->status);
+        }
+        
+        $stories = $storiesQuery->orderBy('published_at', 'desc')->get();
+
+        // Calculate counts
+        $followersCount = $user->followers()->count();
+        $followingCount = $user->follows()->count();
+        $storiesCount = $stories->count();
+
+        // Check if authenticated user is following this user
+        $isFollowing = auth()->user() ? auth()->user()->isFollowing($user) : false;
+
+        // Build response with all required information
+        $data = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'username' => $user->username,
+            'email' => $user->email,
+            'bio' => $user->bio,
+            'avatar_url' => $user->avatar_url,
+            'user_type' => $user->user_type,
+            'followers_count' => $followersCount,
+            'following_count' => $followingCount,
+            'stories_count' => $storiesCount,
+            'is_following' => $isFollowing,
+            'stories' => $stories,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ];
 
         return response()->json([
             'success' => true,
-            'data' => $user,
+            'data' => $data,
         ]);
     }
 
     public function follow(User $user)
     {
-        if (auth()->user()->id === $user->id) {
-            return response()->json([
-                'success' => false,
-                'error' => ['message' => 'Cannot follow yourself'],
-            ], 400);
-        }
-
         if (auth()->user()->isFollowing($user)) {
             return response()->json([
                 'success' => false,

@@ -91,5 +91,31 @@ class User extends Authenticatable
     {
         return $this->bookmarks()->where('story_id', $story->id)->exists();
     }
+
+    /**
+     * Get the route key for the model.
+     * This allows route model binding to work with username instead of ID
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'username';
+    }
+
+    /**
+     * Retrieve the model for route model binding.
+     * Supports both UUID and username lookup
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        // Try to find by username first (if it looks like a username)
+        // Otherwise try by ID (UUID)
+        $user = $this->where('username', $value)->first();
+        
+        if (!$user) {
+            $user = $this->where('id', $value)->first();
+        }
+        
+        return $user;
+    }
 }
 
