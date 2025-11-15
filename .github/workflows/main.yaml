@@ -97,6 +97,7 @@ jobs:
             php artisan optimize:clear
 
             echo "⚡ Optimizing Laravel..."
+            php artisan config:clear
             php artisan config:cache
             if php artisan route:cache 2>/dev/null; then
               echo "✅ Routes cached successfully"
