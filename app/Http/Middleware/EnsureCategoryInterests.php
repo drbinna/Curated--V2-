@@ -19,13 +19,7 @@ class EnsureCategoryInterests
 
         // Check if user has category interests set
         if (!$user || empty($user->category_interests) || !is_array($user->category_interests) || count($user->category_interests) === 0) {
-            return response()->json([
-                'success' => false,
-                'error' => [
-                    'message' => 'Please select your category interests to continue',
-                    'code' => 'CATEGORY_INTERESTS_REQUIRED',
-                ],
-            ], 403);
+ 
         }
 
         return $next($request);

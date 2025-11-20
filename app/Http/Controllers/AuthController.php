@@ -97,7 +97,21 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $user,
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'username' => $user->username,
+                'bio' => $user->bio,
+                'avatar_url' => $user->avatar_url,
+                'user_type' => $user->user_type,
+                'followers_count' => $user->followers_count,
+                'following_count' => $user->following_count,
+                'stories_count' => $user->stories_count,
+                'category_interests' => $user->category_interests,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ],
         ]);
     }
 
@@ -225,14 +239,17 @@ class AuthController extends Controller
 
     public function saveCategoryInterests(Request $request)
     {
+        $user = $request->user();
+        
         $request->validate([
-            'category_ids' => 'required|array',
+            'category_ids' => 'required|array|min:1',
             'category_ids.*' => 'required|string|exists:categories,id',
+            'username' => 'required|string|max:100|unique:users,username,' . $user->id,
         ]);
 
-        $user = $request->user();
         $user->update([
             'category_interests' => $request->category_ids,
+            'username' => $request->username,
         ]);
 
         return response()->json([
