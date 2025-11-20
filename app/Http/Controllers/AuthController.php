@@ -108,7 +108,7 @@ class AuthController extends Controller
                 'followers_count' => $user->followers_count,
                 'following_count' => $user->following_count,
                 'stories_count' => $user->stories_count,
-                'category_interests' => $user->category_interests,
+                'category_interests' => $user->category_interests_with_names,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ],

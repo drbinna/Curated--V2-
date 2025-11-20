@@ -82,6 +82,26 @@ class User extends Authenticatable
         return $this->belongsToMany(Category::class, 'category_follows');
     }
 
+    /**
+     * Get category interests with names
+     */
+    public function getCategoryInterestsWithNamesAttribute()
+    {
+        if (!$this->category_interests || !is_array($this->category_interests) || count($this->category_interests) === 0) {
+            return [];
+        }
+
+        return Category::whereIn('id', $this->category_interests)
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                ];
+            })
+            ->toArray();
+    }
+
     public function isFollowing(User $user): bool
     {
         return $this->follows()->where('following_id', $user->id)->exists();
