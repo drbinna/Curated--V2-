@@ -145,6 +145,24 @@ class AuthController extends Controller
         ]);
 
         $user = $request->user();
+        
+        // Explicitly check for duplicate username before updating
+        if ($request->has('username') && $request->username !== $user->username) {
+            $existingUser = User::where('username', $request->username)
+                ->where('id', '!=', $user->id)
+                ->first();
+            
+            if ($existingUser) {
+                return response()->json([
+                    'success' => false,
+                    'error' => [
+                        'message' => 'The username has already been taken.',
+                        'code' => 'DUPLICATE_USERNAME',
+                    ],
+                ], 422);
+            }
+        }
+        
         $updateData = $request->only(['name', 'username', 'bio']);
 
         // Handle avatar image upload
