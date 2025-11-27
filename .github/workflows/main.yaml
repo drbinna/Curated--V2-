@@ -88,13 +88,14 @@ jobs:
             # echo "🔗 Creating storage symlink..."
             # php artisan storage:link || true
 
+            echo "🗑️ Clearing old cache..."
+            php artisan optimize:clear
+
             # echo "🔄 Running seeders..."
             # php artisan db:seed --class=CategorySeeder
             echo "🔄 Running migrations..."
             php artisan migrate 
 
-            echo "🗑️ Clearing old cache..."
-            php artisan optimize:clear
 
             # echo "⚡ Optimizing Laravel..."
             # php artisan config:clear

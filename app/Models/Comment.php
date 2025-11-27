@@ -26,7 +26,6 @@ class Comment extends Model
             }
         });
 
-        // Auto-calculate path and depth on create
         static::created(function ($comment) {
             $comment->updatePath();
         });
@@ -48,7 +47,6 @@ class Comment extends Model
         'edited_at' => 'datetime',
     ];
 
-    // Relationships
     public function story(): BelongsTo
     {
         return $this->belongsTo(Story::class);
@@ -74,15 +72,12 @@ class Comment extends Model
         return $this->hasMany(CommentLike::class);
     }
 
-    // Calculate and update the materialized path
     public function updatePath(): void
     {
         if ($this->parent_id) {
             $parent = $this->parent;
             $this->path = $parent->path . '/' . $this->id;
             $this->depth = $parent->depth + 1;
-            
-            // Increment parent's reply count
             $parent->increment('replies_count');
         } else {
             $this->path = $this->id;
@@ -92,20 +87,16 @@ class Comment extends Model
         $this->saveQuietly();
     }
 
-    // Get all ancestors
     public function ancestors()
     {
         if (!$this->path) return collect();
         
         $ancestorIds = explode('/', $this->path);
-        array_pop($ancestorIds); // Remove self
+        array_pop($ancestorIds);
         
-        return Comment::whereIn('id', $ancestorIds)
-            ->orderByRaw("FIELD(id, '" . implode("','", $ancestorIds) . "')")
-            ->get();
+        return Comment::whereIn('id', $ancestorIds)->get();
     }
 
-    // Get all descendants (replies and their replies)
     public function descendants()
     {
         return Comment::where('path', 'LIKE', $this->path . '/%')
@@ -113,7 +104,6 @@ class Comment extends Model
             ->get();
     }
 
-    // Scopes
     public function scopeTopLevel($query)
     {
         return $query->whereNull('parent_id');
@@ -124,7 +114,6 @@ class Comment extends Model
         return $query->where('story_id', $storyId);
     }
 
-    // Check if user has liked this comment
     public function isLikedBy(?User $user): bool
     {
         if (!$user) return false;

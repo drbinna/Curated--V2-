@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -12,21 +13,21 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('story_id')->constrained('stories')->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->uuid('parent_id')->nullable(); // NULL = top-level comment
+            $table->uuid('parent_id')->nullable();
             $table->text('body');
-            $table->string('path', 1000)->nullable(); // Materialized path for efficient queries
-            $table->unsignedInteger('depth')->default(0); // Nesting level
-            $table->unsignedInteger('replies_count')->default(0); // Denormalized counter
+            $table->string('path', 255)->nullable();
+            $table->unsignedInteger('depth')->default(0);
+            $table->unsignedInteger('replies_count')->default(0);
             $table->unsignedInteger('likes_count')->default(0);
             $table->timestamp('edited_at')->nullable();
             $table->timestamps();
-            $table->softDeletes(); // Keep structure intact when deleted
+            $table->softDeletes();
 
-            // Indexes for common queries
-            $table->index(['story_id', 'created_at']);
-            $table->index(['story_id', 'path']);
+            // Simple indexes only
+            $table->index('story_id');
             $table->index('parent_id');
             $table->index('user_id');
+            $table->index('created_at');
             
             $table->foreign('parent_id')
                   ->references('id')
@@ -34,20 +35,12 @@ return new class extends Migration
                   ->onDelete('cascade');
         });
 
-        // Optional: Comment likes table
-        Schema::create('comment_likes', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('comment_id')->constrained('comments')->onDelete('cascade');
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->timestamps();
-
-            $table->unique(['comment_id', 'user_id']);
-        });
+        // Add prefix index for path column separately
+        DB::statement('ALTER TABLE comments ADD INDEX comments_path_index (path(191))');
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('comment_likes');
         Schema::dropIfExists('comments');
     }
 };
