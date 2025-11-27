@@ -103,5 +103,10 @@ class Story extends Model
     {
         return $query->where('published_at', '<=', now());
     }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
 

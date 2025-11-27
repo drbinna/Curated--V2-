@@ -10,6 +10,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 
 // Health check
@@ -97,6 +98,14 @@ Route::middleware('auth:sanctum')->group(function () {
         // Upload
         Route::post('/upload/image', [UploadController::class, 'image']);
         Route::delete('/upload/image', [UploadController::class, 'deleteImage']);
+
+        // Comments (inside the auth:sanctum middleware group)
+        Route::get('/stories/{story}/comments', [CommentController::class, 'index']);
+        Route::post('/stories/{story}/comments', [CommentController::class, 'store']);
+        Route::get('/comments/{comment}/replies', [CommentController::class, 'replies']);
+        Route::put('/comments/{comment}', [CommentController::class, 'update']);
+        Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+        Route::post('/comments/{comment}/like', [CommentController::class, 'toggleLike']);
     });
 
 });
