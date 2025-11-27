@@ -14,7 +14,6 @@ class CommentPolicy
 
     public function delete(User $user, Comment $comment): bool
     {
-        // User can delete their own comments, or story owner can delete any
         return $user->id === $comment->user_id 
             || $user->id === $comment->story->user_id;
     }

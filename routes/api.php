@@ -99,7 +99,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/upload/image', [UploadController::class, 'image']);
         Route::delete('/upload/image', [UploadController::class, 'deleteImage']);
 
-        // Comments (inside the auth:sanctum middleware group)
+        // Comments
         Route::get('/stories/{story}/comments', [CommentController::class, 'index']);
         Route::post('/stories/{story}/comments', [CommentController::class, 'store']);
         Route::get('/comments/{comment}/replies', [CommentController::class, 'replies']);

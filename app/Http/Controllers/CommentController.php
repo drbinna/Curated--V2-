@@ -8,12 +8,10 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    // Get comments for a story (threaded structure)
     public function index(Story $story, Request $request)
     {
         $perPage = $request->get('per_page', 20);
         
-        // Get top-level comments with eager-loaded replies (2 levels deep)
         $comments = Comment::forStory($story->id)
             ->topLevel()
             ->with([
@@ -24,7 +22,7 @@ class CommentController extends Controller
                         'replies' => function ($q) {
                             $q->with('user:id,name,username,avatar_url')
                               ->orderBy('created_at', 'asc')
-                              ->limit(3); // Load only first 3 nested replies
+                              ->limit(3);
                         }
                     ])->orderBy('created_at', 'asc');
                 }
@@ -33,7 +31,6 @@ class CommentController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        // Add is_liked flag for authenticated user
         $user = auth()->user();
         $comments->getCollection()->transform(function ($comment) use ($user) {
             return $this->addLikeStatus($comment, $user);
@@ -45,7 +42,6 @@ class CommentController extends Controller
         ]);
     }
 
-    // Get replies for a specific comment (for "load more replies")
     public function replies(Comment $comment, Request $request)
     {
         $replies = $comment->replies()
@@ -65,7 +61,6 @@ class CommentController extends Controller
         ]);
     }
 
-    // Create a comment
     public function store(Request $request, Story $story)
     {
         $request->validate([
@@ -73,7 +68,6 @@ class CommentController extends Controller
             'parent_id' => 'nullable|uuid|exists:comments,id',
         ]);
 
-        // If replying, verify parent belongs to same story
         if ($request->parent_id) {
             $parent = Comment::findOrFail($request->parent_id);
             if ($parent->story_id !== $story->id) {
@@ -83,7 +77,6 @@ class CommentController extends Controller
                 ], 422);
             }
             
-            // Optional: Limit nesting depth (e.g., max 5 levels)
             if ($parent->depth >= 5) {
                 return response()->json([
                     'success' => false,
@@ -100,8 +93,6 @@ class CommentController extends Controller
         ]);
 
         $comment->load('user:id,name,username,avatar_url');
-
-        // Increment story's comment count (add this field to stories table)
         $story->increment('comment_count');
 
         return response()->json([
@@ -111,7 +102,6 @@ class CommentController extends Controller
         ], 201);
     }
 
-    // Update a comment
     public function update(Request $request, Comment $comment)
     {
         $this->authorize('update', $comment);
@@ -131,17 +121,13 @@ class CommentController extends Controller
         ]);
     }
 
-    // Delete a comment
     public function destroy(Comment $comment)
     {
         $this->authorize('delete', $comment);
 
         $storyId = $comment->story_id;
-        
-        // Soft delete preserves thread structure
         $comment->delete();
         
-        // Decrement story's comment count
         Story::find($storyId)?->decrement('comment_count');
 
         return response()->json([
@@ -150,7 +136,6 @@ class CommentController extends Controller
         ]);
     }
 
-    // Like/unlike a comment
     public function toggleLike(Comment $comment)
     {
         $user = auth()->user();
@@ -175,7 +160,6 @@ class CommentController extends Controller
         ]);
     }
 
-    // Helper to add like status to comments
     private function addLikeStatus($comment, $user)
     {
         $comment->is_liked = $comment->isLikedBy($user);
