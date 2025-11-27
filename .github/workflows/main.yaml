@@ -85,20 +85,20 @@ jobs:
             echo "🔐 App key..."
             php artisan key:generate --force --no-interaction || true
 
-            echo "🔗 Creating storage symlink..."
-            php artisan storage:link || true
+            # echo "🔗 Creating storage symlink..."
+            # php artisan storage:link || true
 
-            echo "🔄 Running seeders..."
-            php artisan db:seed --class=CategorySeeder
+            # echo "🔄 Running seeders..."
+            # php artisan db:seed --class=CategorySeeder
             echo "🔄 Running migrations..."
             php artisan migrate 
 
             echo "🗑️ Clearing old cache..."
             php artisan optimize:clear
 
-            echo "⚡ Optimizing Laravel..."
-            php artisan config:clear
-            php artisan config:cache
+            # echo "⚡ Optimizing Laravel..."
+            # php artisan config:clear
+            # php artisan config:cache
             if php artisan route:cache 2>/dev/null; then
               echo "✅ Routes cached successfully"
             else
